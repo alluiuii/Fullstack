@@ -15,6 +15,7 @@ const remove = (id) => {
     const url = baseUrl+`/${id}`
     const req = axios.delete(url)
     return req.then(res => res.data)
+
 }
 
 const update = (id, body) => {

@@ -31,11 +31,35 @@ const Persons = ({personsToShow, clickDelete}) => personsToShow.map(person => {
     }
   )
 
+const Success = ({successMessage}) => {
+  if (successMessage === null) {
+    return null
+  }
+  return (
+    <div className='success'>
+      {successMessage}
+    </div>
+  )
+}
+
+const Alert = ({errorMessage}) => {
+  if (errorMessage === null) {
+    return null
+  }
+  return (
+    <div className='error'>
+      {errorMessage}
+    </div>
+  )
+}
+
 const App = () => {
   const [persons, setPersons] = useState([])
   const [newName, setNewName] = useState('')
   const [newNumber, setNewNumber] = useState('')
   const [filter, setFilter] = useState('')
+  const [successMessage, setSuccessMessage] = useState(null)
+  const [errorMessage, setErrorMessage] = useState(null)
 
   useEffect(() => {
     personService.getAll()
@@ -59,6 +83,11 @@ const App = () => {
     if (window.confirm(`Are you sure you want to delete ${name}`)) {
       personService.remove(id)
         .then(res => setPersons(persons.filter(person => person.id !== id)))
+        .catch(error => {
+          setPersons(persons.filter(person => person.id !== id))
+          setErrorMessage(`User ${name} has already been deleted from the server`)
+          setTimeout(() => setErrorMessage(null), 3000)
+        })
       }
   }
 
@@ -85,6 +114,8 @@ const App = () => {
       .then(res => setPersons(persons.concat(res)))
     setNewName('')
     setNewNumber('')
+    setSuccessMessage(`Successfully added ${newPerson.name} to phonebook`)
+    setTimeout(() => setSuccessMessage(null), 3000)
   }
 
   const personsToShow = persons.filter(person => person.name.toLowerCase().includes(filter.toLowerCase()))
@@ -92,6 +123,8 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
+      <Success successMessage={successMessage}/>
+      <Alert errorMessage={errorMessage} />
       <Filter filter={filter} onChange={handleFilterChange}/>
       <h3>Add new number</h3>
       <PersonForm onSubmit={addPerson} nameValue={newName} handleNameChange={handleNameChange} numberValue={newNumber} handleNumberChange={handleNumberChange}/>
